@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokédex Antecedente</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h1>Pokédex Antecedente</h1>
+
+    <div class="search-box">
+      <input type="text" id="pokemon" placeholder="Inserisci nome Pokémon..." />
+      <button onclick="search()">Cerca</button>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    async function search() {
+      const name = document.getElementById("pokemon").value.trim().toLowerCase();
+      const resultBox = document.getElementById("result");
+      resultBox.innerHTML = "<p>🔍 Caricamento...</p>";
+
+      try {
+        const res = await fetch(`/antecedente/${name}`);
+        if (!res.ok) {
+          resultBox.innerHTML = "<p>❌ Pokémon non trovato!</p>";
+          return;
+        }
+
+        const data = await res.json();
+
+        // === Dati del Pokémon in input ===
+        const mainSprite = data.sprite;
+        const mainName = data.pokemon.charAt(0).toUpperCase() + data.pokemon.slice(1);
+        const mainNumber = data.number;
+
+        let html = `<div class="dex-container">`;
+
+        // === Mostra prima il Pokémon in input ===
+        html += `
+          <div class="pokemon-side">
+            <img src="${mainSprite}" alt="${mainName}">
+            <p>#${String(mainNumber).padStart(3, "0")} ${mainName}</p>
+          </div>
+        `;
+
+        // === Se esiste l'antecedente, aggiungilo dopo con la freccia ===
+        if (data.antecedente && data.antecedente_number) {
+          const prevNum = data.antecedente_number;
+          const prevSprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${prevNum}.png`;
+          const prevName = data.antecedente.charAt(0).toUpperCase() + data.antecedente.slice(1);
+
+          html += `
+            <div class="arrow">→</div>
+            <div class="pokemon-side">
+              <img src="${prevSprite}" alt="${prevName}">
+              <p>#${String(prevNum).padStart(3, "0")} ${prevName}</p>
+            </div>
+          `;
+        } else if (data.message) {
+          html += `<p>${data.message}</p>`;
+        }
+
+        html += "</div>";
+        resultBox.innerHTML = html;
+
+      } catch (err) {
+        console.error(err);
+        resultBox.innerHTML = "<p>❌ Errore di rete o JavaScript.</p>";
+      }
+    }
+
+    // === ⌨️ Aggiunta: premi Invio per cercare ===
+    document.getElementById("pokemon").addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        search();
+      }
+    });
+  </script>
+</body>
+</html>
