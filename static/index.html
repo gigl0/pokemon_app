@@ -28,7 +28,7 @@
       try {
         const res = await fetch(`/antecedente/${name}`);
         if (!res.ok) {
-          resultBox.innerHTML = "<p>❌ Pokémon non trovato!</p>";
+          resultBox.innerHTML = "<p>Pokémon non trovato!</p>";
           return;
         }
 
@@ -71,7 +71,7 @@
 
       } catch (err) {
         console.error(err);
-        resultBox.innerHTML = "<p>❌ Errore di rete o JavaScript.</p>";
+        resultBox.innerHTML = "<p>Errore di rete o JavaScript.</p>";
       }
     }
 
